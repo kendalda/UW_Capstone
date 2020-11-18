@@ -1,14 +1,18 @@
+# script to measure relationships amongst variables that aren't primary or foreign keys
+
 # import libraries
-from itertools import combinations, permutations
+from itertools import permutations
 from collections import OrderedDict
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-# setup variables
+# define variables
 wharf_matrix = np.array
-rows = dat.shape[0]
 ignore_columns = []
+
+# import the data
+rows = dat.shape[0]
 
 # find the cardinality of each column
 for col in dat.columns:
