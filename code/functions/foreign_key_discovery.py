@@ -4,19 +4,28 @@
 import os
 import pandas as pd
 import primary_key_discovery as pk
+import get_files as gf
+
+#--------------------
+# define variables
+#--------------------
+missing_values = ['None']
+
+# command line variables
+#data_source = sys.argv[1] # 'kaggle'
+#data_sample = sys.argv[2] # 'av_healthcare'
 
 # function to find and return foreign keys
-def find_foreign_keys():
+def find_foreign_keys(data_source, data_sample):
     
-    # get the file list and path to the data
-    sample_data = pk.sample_data
-    files = pk.files
+    # get information needed to read files
+    dat_path, dat_source, sample_data, files = gf.get_files(data_source, data_sample)
+    
+    # get the primary keys
+    primary_keys = pk.find_primary_keys(data_source, data_sample)
     
     # define an empty dict for the keys
     foreign_keys = {}
-    
-    # get the primary keys
-    primary_keys = pk.find_primary_keys()
     
     # read the files with primary keys and attempt to determine the foreign keys
     keys = primary_keys.keys()

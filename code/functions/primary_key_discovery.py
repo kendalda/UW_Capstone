@@ -4,18 +4,17 @@
 import os
 import sys
 import pandas as pd
-from code import config
+import get_files as gf
+
 
 #--------------------
 # define variables
 #--------------------
-sample_data = config.sample_data
-files = config.files
 missing_values = ['None']
 
 # command line variables
-data_source = sys.argv[1] # 'kaggle'
-data_sample = sys.argv[2] # 'av_healthcare'
+#data_source = sys.argv[1] # 'kaggle'
+#data_sample = sys.argv[2] # 'av_healthcare'
 
 #------------------------------------------
 # function to find and return primary keys
@@ -25,18 +24,9 @@ def find_primary_keys(data_source, data_sample):
     
     # define an empty dict for the keys
     primary_keys = {}
-        
-    # get the directory of where the data lives
-    dat_path = os.path.abspath(os.path.join(os.getcwd(), '../data'))
     
-    # navigate to the source of data we're using
-    dat_source = os.path.join(dat_path, data_source)
-    
-    # navigate to the sample date if applicable
-    sample_data = os.path.join(dat_source, data_sample)
-    
-    # get a list of files in the sample data folder
-    files = os.listdir(sample_data)
+    # get information needed to read files
+    dat_path, dat_source, sample_data, files = gf.get_files(data_source, data_sample)
     
     # read in each file and attempt to find any primary keys
     for f in files:
