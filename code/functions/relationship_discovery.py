@@ -1,6 +1,8 @@
 # script to measure relationships amongst variables that aren't primary or foreign keys
 
+#------------------
 # import libraries
+#------------------
 from itertools import permutations
 from collections import OrderedDict
 import pandas as pd
@@ -9,7 +11,9 @@ import os
 import get_files as gf
 # import numpy as np
 
+#--------------------
 # define variables
+#--------------------
 # wharf_matrix = np.array
 ignore_columns = []
 missing_values = ['None']

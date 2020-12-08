@@ -1,6 +1,8 @@
 # script to identify primary and foreign keys
 
+#------------------
 # import libraries
+#------------------
 import os
 import sys
 import pandas as pd

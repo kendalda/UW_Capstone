@@ -1,6 +1,8 @@
 # script to identify primary and foreign keys
 
+#------------------
 # import libraries
+#------------------
 import os
 import pandas as pd
 import primary_key_discovery as pk
