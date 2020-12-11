@@ -4,14 +4,17 @@
 # import libraries
 #------------------
 import os
+# import sys
 import pandas as pd
-import primary_key_discovery as pk
+import json
+import numpyencoder as ne
 import get_files as gf
 
 #--------------------
 # define variables
 #--------------------
 missing_values = ['None']
+foreign_keys = {}
 
 # command line variables
 #data_source = sys.argv[1] # 'kaggle'
@@ -22,53 +25,63 @@ def find_foreign_keys(data_source, data_sample):
     
     # get information needed to read files
     dat_path, dat_source, sample_data, files = gf.get_files(data_source, data_sample)
+    json_path = os.path.join(os.path.normpath(dat_path + os.sep + os.pardir), 'results')
+    json_name_primary = data_sample + '_primarykeys' + '.json'
     
-    # get the primary keys
-    primary_keys = pk.find_primary_keys(data_source, data_sample)
+    # get the primary keys from the json file created with the primary key detection module
+    with open(os.path.join(json_path, json_name_primary)) as file:
+        primary_keys = json.load(file)
     
-    # define an empty dict for the keys
-    foreign_keys = {}
-    
-    # read the files with primary keys and attempt to determine the foreign keys
-    keys = primary_keys.keys()
-    
-    for key in keys:
+    # extract the primary keys (files with primary keys)
+    keys_files = list(primary_keys.keys())
         
-        # read in the csv files
-        dat = pd.read_csv(os.path.join(sample_data, key))
+    # loop through the files that do not contain primary keys
+    for f in list(files):
         
-        # get a list of the primary key values
-        temp_primary_keys = dat[primary_keys[key]].unique()
-        
-        # loop through the files that do not contain primary keys
-        for f in files:
+        if f not in keys_files:
+            dat_foreign = pd.read_csv(os.path.join(sample_data, f), low_memory = False)
+                    
+            # get the columns
+            columns = dat_foreign.columns
             
-            if f not in keys:
-                dat_foreign = pd.read_csv(os.path.join(sample_data, f))
-            
-                # get the columns
-                columns = dat_foreign.columns
-            
-                # loop through the columns and get unique values:
-                for col in columns:
+            # extract the primary key values from the primary key dictionary
+            for key in keys_files:
+                
+                key_files_columns = primary_keys[key].keys()
+                
+                for key_column in key_files_columns:
                     
-                    temp_foreign_keys = dat_foreign[col].unique()
-                    
-                    # find the proportion of potential foreign key values that are in the list of primary key values
-                    foreign_key_bool = [foreign for foreign in temp_foreign_keys if foreign in temp_primary_keys]
-                    prop_foreign = len(foreign_key_bool) / len(temp_primary_keys)
-                    
-                    
-                    # if the proportion > 0, we can infer foreign key
-                    if prop_foreign > 0:
+                    temp_primary_keys = primary_keys[key][key_column]
+    
+                    # loop through the columns and get unique values:
+                    for col in columns:
+                                        
+                        temp_foreign_keys = dat_foreign[col].unique()
                         
-                        if f not in foreign_keys.keys():
-                            foreign_keys[f] = {}
-                            foreign_keys[f][col] = prop_foreign
+                        # find the proportion of potential foreign key values that are in the list of primary key values
+                        foreign_key_bool = set(temp_foreign_keys).intersection(temp_primary_keys)
+                        prop_foreign = len(foreign_key_bool) / len(temp_primary_keys)
+                        
+                        # if the proportion > 0, we can infer foreign key
+                        if prop_foreign > 0:
                             
-                        else:
-                            foreign_keys[f][col] = prop_foreign
-                            
+                            if f not in foreign_keys.keys():
+                                foreign_keys[f] = {}
+                                foreign_keys[f][col] = prop_foreign
+                                
+                            else:
+                                foreign_keys[f][col] = prop_foreign
+    
+    # create the name for the json file
+    json_name_foreign = data_sample + '_foreignkeys' + '.json'
+        
+    # write the json file
+    with open(os.path.join(json_path, json_name_foreign), 'w') as file:
+        json.dump(foreign_keys, 
+                  file, 
+                  cls = ne.NumpyEncoder,
+                  indent = 2)
+    
     # return the foreign keys
     return foreign_keys
     

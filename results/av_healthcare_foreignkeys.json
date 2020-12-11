@@ -1,0 +1,14 @@
+{
+  "Third_Health_Camp_Attended.csv": {
+    "Health_Camp_ID": 0.06153846153846154,
+    "Patient_ID": 0.14189673956368082
+  },
+  "Second_Health_Camp_Attended.csv": {
+    "Health_Camp_ID": 0.09230769230769231,
+    "Patient_ID": 0.16270294688172615
+  },
+  "First_Health_Camp_Attended.csv": {
+    "Health_Camp_ID": 0.5230769230769231,
+    "Patient_ID": 0.09427895729811601
+  }
+}
