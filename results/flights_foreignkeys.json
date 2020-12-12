@@ -1,0 +1,7 @@
+{
+  "flights.csv": {
+    "AIRLINE": 1.0,
+    "ORIGIN_AIRPORT": 1.0,
+    "DESTINATION_AIRPORT": 1.0
+  }
+}

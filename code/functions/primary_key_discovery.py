@@ -42,7 +42,9 @@ def find_primary_keys(data_source, data_sample):
             cols = {}
                     
             # read in each csv file
-            dat = pd.read_csv(os.path.join(sample_data, f), na_values = missing_values, low_memory= False)
+            dat = pd.read_csv(os.path.join(sample_data, f), 
+                              na_values = missing_values, 
+                              low_memory= False)
                 
             # get the total number of rows
             rows = dat.shape[0]

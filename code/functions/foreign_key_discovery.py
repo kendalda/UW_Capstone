@@ -14,7 +14,6 @@ import get_files as gf
 # define variables
 #--------------------
 missing_values = ['None']
-foreign_keys = {}
 
 # command line variables
 #data_source = sys.argv[1] # 'kaggle'
@@ -22,6 +21,8 @@ foreign_keys = {}
 
 # function to find and return foreign keys
 def find_foreign_keys(data_source, data_sample):
+    
+    foreign_keys = {}
     
     # get information needed to read files
     dat_path, dat_source, sample_data, files = gf.get_files(data_source, data_sample)
@@ -39,7 +40,10 @@ def find_foreign_keys(data_source, data_sample):
     for f in list(files):
         
         if f not in keys_files:
-            dat_foreign = pd.read_csv(os.path.join(sample_data, f), low_memory = False)
+            dat_foreign = pd.read_csv(os.path.join(sample_data, f), 
+                                      na_values = missing_values,
+                                      low_memory = False,
+                                      encoding='latin1')
                     
             # get the columns
             columns = dat_foreign.columns
