@@ -1,5 +1,6 @@
 import primary_key_discovery as pk
 import foreign_key_discovery as fk
+import relationship_discovery as rd
 
 # import get_files as gf
 # dat_path, dat_source, sample_data, files = gf.get_files('kaggle', 'av_healthcare')
@@ -49,3 +50,10 @@ lp = LineProfiler()
 lp_wrapper = lp(fk.find_foreign_keys)
 lp_wrapper('kaggle', 'av_healthcare')
 lp.print_stats()
+
+
+#-------------------------------
+# relationship discovery tests
+#-------------------------------
+
+providers = rd.find_relationships('kaggle', 'healthcare_providers')

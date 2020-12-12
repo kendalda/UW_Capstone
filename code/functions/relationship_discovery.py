@@ -5,6 +5,7 @@
 #------------------
 from itertools import permutations
 from collections import OrderedDict
+import json
 import pandas as pd
 # import sys
 import os
@@ -17,7 +18,6 @@ import get_files as gf
 # wharf_matrix = np.array
 ignore_columns = []
 missing_values = ['None']
-wharf_dict = {}
 
 # command line variables
 #data_source = sys.argv[1] # 'kaggle'
@@ -28,6 +28,8 @@ wharf_dict = {}
 #--------------------------------------------------------------------------------
 
 def find_relationships(data_source, data_sample):
+    
+    wharf_dict = {}
     
     # get information needed to read files
     dat_path, dat_source, sample_data, files = gf.get_files(data_source, data_sample)
@@ -92,10 +94,23 @@ def find_relationships(data_source, data_sample):
                     w = (dat.groupby([col1, col2])[col2].count().max(level=0)).sum()/dat.shape[0]
                 
                     # add the column combination to the dictionary
-                    wharf_dict[col1, col2] = w
+                    if w >= .9:
+                        wharf_dict[col1 + '|||' + col2] = w
                 
             # remove the col1 value to ensure there are no duplicate values returned
             column_combo_lists0.remove(col1)
+            
+    # create the name for the json file
+    json_name = data_sample + '_relationships' + '.json'
+    
+    # find the file path for the json file to be written to
+    json_path = os.path.join(os.path.normpath(dat_path + os.sep + os.pardir), 'results')
+        
+    # write the json file
+    with open(os.path.join(json_path, json_name), 'w') as file:
+        json.dump(wharf_dict, 
+                  file,
+                  indent = 2)
                 
     return wharf_dict
 
