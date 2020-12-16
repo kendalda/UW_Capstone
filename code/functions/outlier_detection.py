@@ -26,8 +26,8 @@ outlier_columns = []
 #data_sample = sys.argv[2] # 'av_healthcare'
 
 data_source = 'harvard'
-#data_sample = 'cancer'
-data_sample = 'thyroid'
+data_sample = 'cancer'
+#data_sample = 'thyroid'
 
 #--------------------
 # read in the data
@@ -84,33 +84,84 @@ outlier_dat = pca.transform(outlier_dat)
 # dbscan (no training needed)
 #------------------------------
 
-# initiate the model
-dbscan_outliers = DBSCAN(eps = 2, min_samples = 3)
+# create a list of values for eps
+eps_ = list(np.arange(.5, 5.5, .5))
 
-# fit the model
-dbscan_model = dbscan_outliers.fit(outlier_dat)
+# create a list of values for min samples
+min_samples_ = list(np.arange(2, 11, 1))
 
-# get the labels
-labels = dbscan_model.labels_
+# place holder for comparison value of silhouette score
+silhouette_old = ''
 
-# find the core points
-core_points = np.zeros_like(labels, dtype = bool)
-core_points[dbscan_outliers.core_sample_indices_] = True
+# loop through the eps and min_sample values to find the best model
+for n in min_samples_:
+    
+    for e in eps_:
 
-# find the number of clusters
-n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-# print the silhouette score, min sample, and eps value
-silhouette_ = metrics.silhouette_score(outlier_dat, labels)
+        # initiate the model
+        dbscan_outliers = DBSCAN(eps=e, min_samples=n)
+        
+        # fit the model
+        dbscan_model = dbscan_outliers.fit(outlier_dat)
+        
+        # get the labels
+        labels = dbscan_model.labels_
+        
+        # find the core points
+        # core_points = np.zeros_like(labels, dtype = bool)
+        # core_points[dbscan_outliers.core_sample_indices_] = True
+        
+        # find the number of clusters
+        # n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+        
+        # only print the information if we have more than one label
+        if len(np.unique(labels)) > 1:
+            
+            # print the silhouette score, min sample, and eps value
+            silhouette_ = metrics.silhouette_score(outlier_dat, labels)
+            
+            # only continue if we get a better silhouette score
+            if silhouette_old == '':
+                silhouette_old = silhouette_
                 
-# join the outlier labels back to the original dataset
-dat['dbscan_outliers'] = labels
-
-# values of -1 are outliers, code these as 1 and anything else as 0
-dat['dbscan_outliers'] = (dat['dbscan_outliers'] == -1)
-dat['dbscan_outliers'] = dat['dbscan_outliers'].astype(int)
-
-print(dat['dbscan_outliers'].value_counts())
+            if silhouette_ >= silhouette_old:
+                            
+                # join the outlier labels back to the original dataset
+                dat['dbscan_outliers'] = labels
+                
+                # values of -1 are outliers, code these as 1 and anything else as 0
+                dat['dbscan_outliers'] = (dat['dbscan_outliers'] == -1)
+                dat['dbscan_outliers'] = dat['dbscan_outliers'].astype(int)
+                
+                # print(dat['dbscan_outliers'].value_counts())
+                
+                # silhouette score
+                print('DBSCAN - Silhouette Score:', silhouette_)
+                
+                # false positive rate
+                true_negative = len(dat[(dat[ignore_column - 1] == 'n') & (dat['dbscan_outliers'] == 0)])
+                false_positives = len(dat[(dat[ignore_column - 1] == 'n') & (dat['dbscan_outliers'] == 1)])
+                print("DBSCAN - False Positive Rate:", 100*(false_positives/(true_negative + false_positives)))
+                
+                # false negative rate
+                false_negative = len(dat[(dat[ignore_column - 1] == 'o') & (dat['dbscan_outliers'] == 0)])
+                true_positives = len(dat[(dat[ignore_column - 1] == 'o') & (dat['dbscan_outliers'] == 1)])
+                print("DBSCAN - False Negative Rate:", 100*(false_negative/(false_negative + true_positives)))
+                
+                # find the accuracy of the model
+                num_correct = len(dat[(dat[ignore_column - 1] == 'n') & (dat['dbscan_outliers'] == 0) | (dat[ignore_column - 1] == 'o') & (dat['dbscan_outliers'] == 1)])
+                print("DBSCAN - Accuracy:", 100*(num_correct/dat.shape[0]))
+                
+                # print the values of min_samples and eps
+                print('eps: ', e)
+                print('min_samples', n)
+                
+                print()
+                
+                silhouette_old = silhouette_
+            
+            else:
+                continue
 
 #----------------------------------------
 # isolation forest (no training needed)
