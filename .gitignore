@@ -3,3 +3,4 @@
 .DS_Store
 data/kaggle/.DS_Store
 *.pyc
+*.txt

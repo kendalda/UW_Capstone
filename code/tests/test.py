@@ -57,3 +57,16 @@ lp.print_stats()
 #-------------------------------
 
 providers = rd.find_relationships('kaggle', 'healthcare_providers')
+
+
+#-------------------------------
+# outlier detection tests
+#-------------------------------
+
+
+
+
+
+
+
+
